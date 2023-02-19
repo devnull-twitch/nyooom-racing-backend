@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/devnull-twitch/nyooom-backend/internal/server"
 	"github.com/devnull-twitch/nyooom-backend/pkg/jsondb"
@@ -18,9 +20,17 @@ func main() {
 
 	repo := jsondb.CreateFileDatabase()
 
-	editorCheckMW := server.GetEditorMiddleware([]*server.EditorLogin{
-		{Username: "devnull", Password: "devnull123"},
-	})
+	editors := make([]*server.EditorLogin, 0)
+	editorConfigStr := os.Getenv("EDITORS")
+	for _, credentials := range strings.Split(editorConfigStr, ";") {
+		credentialParts := strings.Split(credentials, "=")
+		if len(credentialParts) != 2 {
+			panic(fmt.Errorf("invalid editor credentials. must be user=pass"))
+		}
+
+		editors = append(editors, &server.EditorLogin{Username: credentialParts[0], Password: credentialParts[1]})
+	}
+	editorCheckMW := server.GetEditorMiddleware(editors)
 
 	r := gin.Default()
 
