@@ -11,6 +11,7 @@ const (
 	RaceEventType EventType = iota + 1
 	SprintEventType
 	PreSeason
+	PreSeasonSprintType
 )
 
 func (e EventType) Name() string {
@@ -20,7 +21,9 @@ func (e EventType) Name() string {
 	case SprintEventType:
 		return "Sprint"
 	case PreSeason:
-		return "Pre-Season"
+		return "Pre-Season race"
+	case PreSeasonSprintType:
+		return "Pre-Season sprint"
 	default:
 		return "Unknown"
 	}

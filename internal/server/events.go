@@ -106,18 +106,7 @@ func CreateRaceEventHandler(repo jsondb.JsonDatabase) gin.HandlerFunc {
 			})
 		}
 
-		for index, driverID := range userInput.Results {
-			var points uint64 = 0
-			if newRaceEvent.Type == jsondb.RaceEventType {
-				points = getPointsByIndex(index)
-			}
-			newRaceEvent.Results = append(newRaceEvent.Results, jsondb.RacePosition{
-				Position: uint64(index + 1),
-				Points:   points,
-				DriverID: driverID,
-				TeamID:   driverToTeamMap[driverID],
-			})
-		}
+		newRaceEvent.Results = buildResults(userInput.Results, newRaceEvent.Type, driverToTeamMap)
 
 		if err := repo.AddEvent(newRaceEvent); err != nil {
 			logrus.WithError(err).Warn("unable to add race event")
@@ -176,18 +165,7 @@ func UpdateRaceEventHandler(repo jsondb.JsonDatabase) gin.HandlerFunc {
 			})
 		}
 
-		for index, driverID := range userInput.Results {
-			var points uint64 = 0
-			if newRaceEvent.Type == jsondb.RaceEventType {
-				points = getPointsByIndex(index)
-			}
-			newRaceEvent.Results = append(newRaceEvent.Results, jsondb.RacePosition{
-				Position: uint64(index + 1),
-				Points:   points,
-				DriverID: driverID,
-				TeamID:   driverToTeamMap[driverID],
-			})
-		}
+		newRaceEvent.Results = buildResults(userInput.Results, newRaceEvent.Type, driverToTeamMap)
 
 		if err := repo.UpdateEvent(newRaceEvent); err != nil {
 			logrus.WithError(err).Warn("unable to update event")
@@ -217,11 +195,58 @@ func DeleteRaceEventHandler(repo jsondb.JsonDatabase) gin.HandlerFunc {
 	}
 }
 
-func getPointsByIndex(index int) uint64 {
-	points := 10 - index
+func buildResults(input []uint64, eventType jsondb.EventType, driverToTeamMap map[uint64]uint64) []jsondb.RacePosition {
+	res := make([]jsondb.RacePosition, 0, len(input))
+	for index, driverID := range input {
+		var points uint64 = 0
+		if eventType == jsondb.SprintEventType || eventType == jsondb.PreSeasonSprintType {
+			points = getSprintPointsByIndex(index)
+		} else if eventType == jsondb.RaceEventType || eventType == jsondb.PreSeason {
+			points = getRacePointsByIndex(index)
+		}
+		res = append(res, jsondb.RacePosition{
+			Position: uint64(index + 1),
+			Points:   points,
+			DriverID: driverID,
+			TeamID:   driverToTeamMap[driverID],
+		})
+	}
+
+	return res
+}
+
+func getSprintPointsByIndex(index int) uint64 {
+	points := 8 - index
 	if points > 0 {
 		return uint64(points)
 	}
 
 	return 0
+}
+
+func getRacePointsByIndex(index int) uint64 {
+	switch index {
+	case 0:
+		return 25
+	case 1:
+		return 18
+	case 2:
+		return 15
+	case 3:
+		return 12
+	case 4:
+		return 10
+	case 5:
+		return 8
+	case 6:
+		return 6
+	case 7:
+		return 4
+	case 8:
+		return 2
+	case 9:
+		return 1
+	default:
+		return 0
+	}
 }

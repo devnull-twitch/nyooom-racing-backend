@@ -33,7 +33,9 @@ func convertTeamsToResponse(teams []jsondb.Team, events []jsondb.RaceEvent) []te
 
 	for _, e := range events {
 		for _, result := range e.Results {
-			teamMap[result.TeamID].Points += result.Points
+			if e.Type == jsondb.RaceEventType || e.Type == jsondb.SprintEventType {
+				teamMap[result.TeamID].Points += result.Points
+			}
 			teamMap[result.TeamID].Results = append(teamMap[result.TeamID].Results, teamResultResponse{
 				EventName:  e.Name,
 				DriverName: driverMap[result.DriverID].Name,
