@@ -42,7 +42,9 @@ func convertTeamsToResponse(teams []jsondb.Team, events []jsondb.RaceEvent) []te
 				Points:     result.Points,
 				Position:   result.Position,
 			})
-			driverMap[result.DriverID].Points += result.Points
+			if e.Type == jsondb.RaceEventType || e.Type == jsondb.SprintEventType {
+				driverMap[result.DriverID].Points += result.Points
+			}
 			driverMap[result.DriverID].Results = append(driverMap[result.DriverID].Results, driverResultResponse{
 				EventName: e.Name,
 				Points:    result.Points,
