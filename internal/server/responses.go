@@ -14,18 +14,20 @@ type driverResultResponse struct {
 }
 
 type driverResponse struct {
-	ID      uint64                 `json:"id"`
-	Name    string                 `json:"name"`
-	Points  uint64                 `json:"points"`
-	Results []driverResultResponse `json:"results"`
+	ID              uint64                 `json:"id"`
+	Name            string                 `json:"name"`
+	Points          uint64                 `json:"points"`
+	PreSeasonPoints uint64                 `json:"pre_season_points"`
+	Results         []driverResultResponse `json:"results"`
 }
 
 type teamResponse struct {
-	ID      uint64               `json:"id"`
-	Name    string               `json:"name"`
-	Points  uint64               `json:"points"`
-	Results []teamResultResponse `json:"results"`
-	Drivers []driverResponse     `json:"drivers"`
+	ID              uint64               `json:"id"`
+	Name            string               `json:"name"`
+	Points          uint64               `json:"points"`
+	PreSeasonPoints uint64               `json:"pre_season_points"`
+	Results         []teamResultResponse `json:"results"`
+	Drivers         []driverResponse     `json:"drivers"`
 }
 
 type eventGridResponse struct {
