@@ -1,0 +1,26 @@
+name: 'Build binary'
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v4
+      -
+        name: Run build
+        run: |
+          go build -o nyooom-server cmd/server/main.go
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          omitBody: true
+          artifacts: nyooom-server
+      
