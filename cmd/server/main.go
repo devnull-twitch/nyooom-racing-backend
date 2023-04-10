@@ -44,6 +44,7 @@ func main() {
 	r.GET("/team", server.GetTeamsHandler(repo))
 	r.GET("/team/:team_id", server.GetTeamHandler(repo))
 	r.GET("/race", server.GetEventsHandler(repo))
+	r.GET("/race/latest", server.GetLatestEventHandler(repo))
 	r.GET("/race/:race_id", server.GetEventHandler(repo))
 
 	r.POST("/team", editorCheckMW, server.AddTeamHandler(repo))

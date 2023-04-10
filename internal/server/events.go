@@ -58,6 +58,50 @@ func GetEventHandler(repo jsondb.JsonDatabase) gin.HandlerFunc {
 	}
 }
 
+func GetLatestEventHandler(repo jsondb.JsonDatabase) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		events, err := repo.ListEvents()
+		if err != nil {
+			logrus.WithError(err).Warn("unable to read events")
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		latest := getLatest(events)
+		if latest == nil {
+			ctx.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+
+		teamNameMap, driverNameMap, err := buildNameMaps(repo)
+		if err != nil {
+			logrus.WithError(err).Warn("unable to generate name maps")
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		eventResp := convertEventToResponse(*latest, teamNameMap, driverNameMap)
+		ctx.JSON(http.StatusOK, eventResp)
+	}
+}
+
+func getLatest(events []jsondb.RaceEvent) *jsondb.RaceEvent {
+	if len(events) <= 0 {
+		return nil
+	}
+
+	latestEvent := &events[0]
+	if len(events) > 1 {
+		for _, checkEvent := range events[1:] {
+			if checkEvent.Date > latestEvent.Date {
+				latestEvent = &checkEvent
+			}
+		}
+	}
+
+	return latestEvent
+}
+
 type raceEventRequest struct {
 	Name         string           `json:"name"`
 	Date         int64            `json:"race_date_unix"`
